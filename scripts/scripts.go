@@ -36,7 +36,7 @@ func parseCharacter(data *string, index *int) (Token, error) {
 	}
 
 	(*index)++
-	return &Value{value: character}, nil
+	return &Value{Value: character}, nil
 }
 
 func parseLiteral(data *string, index *int) (Token, error) {
@@ -47,7 +47,7 @@ func parseLiteral(data *string, index *int) (Token, error) {
 		switch character {
 		case '"':
 			(*index)++
-			return &Value{value: literal.String()}, nil
+			return &Value{Value: literal.String()}, nil
 		case '\\':
 			(*index)++
 			literal.WriteByte(parseSpecialCharacter((*data)[*index]))
@@ -180,7 +180,7 @@ func parseNumber(token string) (interface{}, error) {
 		return strconv.ParseFloat(token, 64)
 	default:
 		// if no format triggers here this token is used as a string
-		return &Value{value: token}, nil
+		return &Value{Value: token}, nil
 	}
 }
 
@@ -238,7 +238,7 @@ func (parser *Parser) analyseToken(token string, data *string, index *int, start
 			return nil, err
 		}
 
-		return &Value{value: number}, nil
+		return &Value{Value: number}, nil
 	}
 
 	if startofstatement {
@@ -259,11 +259,11 @@ func (parser *Parser) analyseToken(token string, data *string, index *int, start
 
 	switch token {
 	case "true":
-		return &Value{value: true}, nil
+		return &Value{Value: true}, nil
 	case "false":
-		return &Value{value: false}, nil
+		return &Value{Value: false}, nil
 	case "null":
-		return &Value{value: nil}, nil
+		return &Value{Value: nil}, nil
 	}
 
 	return &Variable{Name: token}, nil
@@ -315,7 +315,7 @@ func (parser *Parser) parseInterpolation(data *string, index *int) (Token, error
 		switch character {
 		case '"':
 			(*index)++
-			tokens = append(tokens, &Value{value: literal.String()})
+			tokens = append(tokens, &Value{Value: literal.String()})
 			return &Interpolation{tokens: tokens}, nil
 		case '{':
 			(*index)++
@@ -323,7 +323,7 @@ func (parser *Parser) parseInterpolation(data *string, index *int) (Token, error
 				literal.WriteRune('{')
 			} else {
 				if literal.Len() > 0 {
-					tokens = append(tokens, &Value{value: literal.String()})
+					tokens = append(tokens, &Value{Value: literal.String()})
 					literal.Reset()
 				}
 
@@ -466,7 +466,7 @@ func (parser *Parser) parseTokenBlock(parent Token, data *string, index *int, st
 		case '[':
 			// TODO: parse indexer
 			return nil, errors.New("Array indexer not yet implemented")
-		case ',', ']', '}':
+		case ',', ']', '}', ')':
 			done = true
 		default:
 			if !concat {
@@ -499,7 +499,7 @@ func (parser *Parser) parseTokenBlock(parent Token, data *string, index *int, st
 
 		for _, opindex := range operators {
 			switch opindex.operator.Class {
-			case OP_PreUnary:
+			case OP_PostUnary:
 				if opindex.index == 0 {
 					return nil, errors.New("Posttoken at beginning of tokenlist")
 				}
@@ -507,8 +507,8 @@ func (parser *Parser) parseTokenBlock(parent Token, data *string, index *int, st
 				opindex.operator.LHS = tokens[opindex.index-1]
 				tokens = removeAt(tokens, opindex.index-1)
 				adjustOperatorIndices(operators, opindex.index, 1)
-			case OP_PostUnary:
-				opindex.operator.RHS = tokens[opindex.index+1]
+			case OP_PreUnary:
+				opindex.operator.LHS = tokens[opindex.index+1]
 				tokens = removeAt(tokens, opindex.index+1)
 				adjustOperatorIndices(operators, opindex.index-1, 1)
 			case OP_Binary:
@@ -578,12 +578,12 @@ func (parser *Parser) parseStatementBlock(parent Token, data *string, index *int
 
 	if len(statements) <= 1 {
 		return &StatementBlock{
-			tokens:      statements,
-			methodblock: methodblock}, nil
+			Body:     statements,
+			IsMethod: methodblock}, nil
 	}
 
 	// TODO: fetch control tokens as soon as they are supported
 	return &StatementBlock{
-		tokens:      statements,
-		methodblock: methodblock}, nil
+		Body:     statements,
+		IsMethod: methodblock}, nil
 }

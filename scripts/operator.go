@@ -3,22 +3,24 @@ package scripts
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/spf13/cast"
 )
 
-type operatorType int8
-type operatorClass int8
+type OperatorType int8
+type OperatorClass int8
 
 const (
-	OP_Not operatorType = iota
+	OP_Not OperatorType = iota
 	OP_Neg
 	OP_Com
 	OP_Inc
 	OP_Dec
-	OP_Add
-	OP_Sub
 	OP_Mul
 	OP_Div
 	OP_Mod
+	OP_Add
+	OP_Sub
 	OP_BitAnd
 	OP_BitOr
 	OP_BitXor
@@ -52,15 +54,15 @@ const (
 )
 
 const (
-	OP_PreUnary operatorClass = iota
+	OP_PreUnary OperatorClass = iota
 	OP_PostUnary
 	OP_Binary
 )
 
 // Operator operates on one or two tokens depending on class to produce a result
 type Operator struct {
-	Type  operatorType
-	Class operatorClass
+	Type  OperatorType
+	Class OperatorClass
 	LHS   Token
 	RHS   Token
 }
@@ -71,6 +73,8 @@ func (op *Operator) Execute(variables *Variables) (interface{}, error) {
 	var err error
 
 	switch op.Type {
+	case OP_Neg:
+		value, err = op.neg(variables)
 	case OP_Equal:
 		value, err = op.equal(variables)
 	case OP_NotEqual:
@@ -231,6 +235,22 @@ func (op *Operator) less(variables *Variables) (bool, error) {
 	}
 
 	return false, err
+}
+
+func (op *Operator) neg(variables *Variables) (interface{}, error) {
+	lhs, err := op.LHS.Execute(variables)
+	if err != nil {
+		return false, err
+	}
+
+	switch v := lhs.(type) {
+	case int, int8, int16, int32, int64, uint8, uint16, uint32, uint64:
+		return -cast.ToInt64(v), nil
+	case float32, float64:
+		return -cast.ToFloat64(v), nil
+	default:
+		return false, fmt.Errorf("Negation not supported for '%v'", reflect.ValueOf(lhs))
+	}
 }
 
 func (op *Operator) lessEqual(variables *Variables) (bool, error) {

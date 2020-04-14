@@ -8,7 +8,7 @@ type OperatorTree struct {
 }
 
 // AddOperator adds an operator to the tree
-func (tree *OperatorTree) AddOperator(literal string, operator operatorType) {
+func (tree *OperatorTree) AddOperator(literal string, operator OperatorType) {
 	current := &tree.OperatorNode
 
 	for _, character := range literal {
@@ -43,6 +43,7 @@ loop:
 
 		child, found := current.GetChild(rune(character))
 		if !found {
+			(*index)--
 			break
 		}
 

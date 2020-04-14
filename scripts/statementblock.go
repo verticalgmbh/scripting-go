@@ -2,8 +2,8 @@ package scripts
 
 // StatementBlock series of statements
 type StatementBlock struct {
-	tokens      []Token
-	methodblock bool
+	Body     []Token
+	IsMethod bool
 }
 
 // Execute executes the statement block
@@ -12,7 +12,7 @@ func (block *StatementBlock) Execute(variables *Variables) (interface{}, error) 
 	var result interface{}
 	var err error
 
-	for _, token := range block.tokens {
+	for _, token := range block.Body {
 		result, err = token.Execute(blockvariables)
 		if err != nil {
 			return nil, err

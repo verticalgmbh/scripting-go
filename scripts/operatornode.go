@@ -2,7 +2,7 @@ package scripts
 
 // OperatorNode node in an operator tree
 type OperatorNode struct {
-	operator  operatorType
+	operator  OperatorType
 	character rune
 	children  map[rune]*OperatorNode
 }
