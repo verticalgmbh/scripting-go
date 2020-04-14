@@ -16,11 +16,11 @@ const (
 	OP_Com
 	OP_Inc
 	OP_Dec
-	OP_Mul
 	OP_Div
+	OP_Mul
 	OP_Mod
-	OP_Add
 	OP_Sub
+	OP_Add
 	OP_BitAnd
 	OP_BitOr
 	OP_BitXor

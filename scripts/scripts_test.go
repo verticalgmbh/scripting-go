@@ -94,3 +94,47 @@ func Test_UnaryNegExecution(t *testing.T) {
 	result, err := script.Execute(vars)
 	require.NotNil(t, result)
 }
+
+func Test_BlockMinusValue(t *testing.T) {
+	parser := NewParser(NewExpressionOperators())
+	script, err := parser.Parse("(2*x-x+3*x-2*x)-8")
+	require.NoError(t, err)
+	require.NotNil(t, script)
+
+	vars := NewVariables(nil)
+	vars.SetVariable("x", -2.0)
+	result, err := script.Execute(vars)
+	require.Equal(t, -12.0, result)
+}
+
+//
+
+func Test_ComplexBlock1(t *testing.T) {
+	parser := NewParser(NewExpressionOperators())
+	script, err := parser.Parse("(x+y)*(y-z)/a")
+	require.NoError(t, err)
+	require.NotNil(t, script)
+
+	vars := NewVariables(nil)
+	vars.SetVariable("x", 51.218740)
+	vars.SetVariable("y", -162.983525)
+	vars.SetVariable("z", 104.097663)
+	vars.SetVariable("a", 38.999995)
+	result, err := script.Execute(vars)
+	require.Equal(t, 765.39162416926, result)
+}
+
+func Test_ComplexBlock2(t *testing.T) {
+	parser := NewParser(NewExpressionOperators())
+	script, err := parser.Parse("(x+y)*(y-z)/a")
+	require.NoError(t, err)
+	require.NotNil(t, script)
+
+	vars := NewVariables(nil)
+	vars.SetVariable("x", 51.218740)
+	vars.SetVariable("y", -162.983525)
+	vars.SetVariable("z", 104.097663)
+	vars.SetVariable("a", 38.999995)
+	result, err := script.Execute(vars)
+	require.Equal(t, 765.39162416926, result)
+}

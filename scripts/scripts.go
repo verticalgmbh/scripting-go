@@ -358,7 +358,12 @@ func (parser *Parser) parseBlock(data *string, index *int) (Token, error) {
 	}
 
 	(*index)++
-	return block, nil
+	return &StatementBlock{
+		Body: []Token{
+			block,
+		},
+		IsMethod: false,
+	}, nil
 }
 
 func parseMember(host Token, data *string, index *int) (Token, error) {
